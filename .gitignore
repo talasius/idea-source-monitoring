@@ -1,0 +1,5 @@
+# Omit output directory
+/data
+
+#Omit lastrun file
+mcgurk_lastrun.py
