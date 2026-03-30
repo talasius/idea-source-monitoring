@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2026.1.0),
-    on March 22, 2026, at 20:16
+    on March 31, 2026, at 00:42
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -45,7 +45,7 @@ expVersion = ''
 runAtExit = []
 # information about this experiment
 expInfo = {
-    'participantID': ["A800", "A470", "B870"],
+    'participantID': ["A800", "A111", "B870"],
     'date|hid': data.getDateStr(),
     'expName|hid': expName,
     'expVersion|hid': expVersion,
@@ -358,126 +358,250 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     
     # Start Code - component code to be run after the window creation
     
-    # --- Initialize components for Routine "instructions" ---
+    # --- Initialize components for Routine "startup_routine" ---
+    # Run 'Begin Experiment' code from startupCode
+    import csv
+    
+    participantId = expInfo['participantID']
+    stimuliPath = f'./stimuli/{participantId}_ideas.csv'
+    
+    with open(stimuliPath, encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        allIdeas = list(reader)
+    
+    totalIdeas = len(allIdeas)
+    
+    ideaStims = []
+    for i in range(10):
+        stim = visual.TextStim(
+            win,
+            text='',
+            pos=(0, 0.15 - i * 0.08),
+            height=0.04,
+            font='Courier New',
+            color='#090521',
+            anchorHoriz='left',
+            alignText='left',
+            wrapWidth=0.75
+        )
+        ideaStims.append(stim)
+    
+    ideaStimsObs = []
+    for i in range(10):
+        stim = visual.TextStim(
+            win,
+            text='',
+            pos=(0.1, 0.15 - i * 0.08),
+            height=0.04,
+            font='Courier New',
+            color='#090521',
+            anchorHoriz='left',
+            alignText='left',
+            wrapWidth=0.75
+        )
+        ideaStimsObs.append(stim)
+    
+    headerLeft = visual.TextStim(
+        win, text='Участник А', font='Courier New',
+        pos=(-0.50, 0.27), height=0.045,
+        color='#090521', bold=True
+    )
+    headerRight = visual.TextStim(
+        win, text='Участник Б', font='Courier New',
+        pos=(0.50, 0.27), height=0.045,
+        color='#090521', bold=True
+    )
+    
+    nextButton = visual.Rect(
+        win, width=0.3, height=0.07,
+        pos=(0, -0.40), fillColor='#003049'
+    )
+    nextButtonText = visual.TextStim(
+        win, text='Далее', font='Courier New',
+        pos=(0, -0.40), height=0.05, color='#f1faee'
+    )
+    
+    selectionMouse = event.Mouse(win=win)
+    
+    print(f'[startupCode] Загружено листов: {totalIdeas} для участника {participantId}')
     # Run 'Begin Experiment' code from initialiseConditions
     skipConfidence = False
     skipSource = False
     ceInstructionCount = 0
-    prevCoreItem = ''
-    currentCoreItem = ''
-    # Run 'Begin Experiment' code from getParticipantId
-    participantId = expInfo['participantID']
-    stimuliPath = f'./stimuli/{participantId}_ideas.csv'
+    isSourceEmpty = False
+    
+    prevBaseItem = ''
+    currentBaseItem = ''
+    prevRole = ''
+    currentRole = ''
+    
+    selectedObs = []
+    wasPressedObs = False
+    
+    # --- Initialize components for Routine "instructions" ---
     inastructionText = visual.TextStim(win=win, name='inastructionText',
-        text='Сейчас вам будет показан список идей.\n\nДля каждой идеи ответьте на вопрос:  помните ли вы, что эта идея была озвучена  кем-либо из участников во время сессии?\n\nЕсли помните — вы оцените свою уверенность  в том, кто именно был автором идеи. \n\nДля начала нажмите ПРОБЕЛ',
+        text='Добро пожаловать на второй этап исследования!\n\nСегодня вам предстоит поработать с материалами  предыдущей встречи. \n\nВы увидите списки идей, которые предлагались участниками вашей группы.\nВаша задача — оценить эти идеи по нескольким критериям. \n\nНажмите [ПРОБЕЛ], чтобы продолжить.',
         font='Courier New',
-        pos=(0, 0), draggable=False, height=0.05, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
+        pos=(0, 0), draggable=False, height=0.04, wrapWidth=1.3, ori=0.0, 
+        color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
-        depth=-2.0);
-    proceedKey = keyboard.Keyboard(deviceName='defaultKeyboard')
+        depth=0.0);
+    instructionsButton = keyboard.Keyboard(deviceName='defaultKeyboard')
+    
+    # --- Initialize components for Routine "instructions_part_1" ---
+    insructionFirstPartText = visual.TextStim(win=win, name='insructionFirstPartText',
+        text='В этой части вам будут показаны списки идей, записанных участниками вашей группы.\n\nВаша задача — отметить те идеи, которые, по вашим воспоминаниям, действительно звучали на предыдущей встрече. \n\nКликните на идею, чтобы отметить её. Отмеченная идея выделится зелёным цветом. Повторный клик снимает отметку.\n\nКогда закончите, нажмите кнопку «Далее».\n\nНажмите [ПРОБЕЛ] для начала.',
+        font='Courier New',
+        pos=(0, 0), draggable=False, height=0.04, wrapWidth=1.3, ori=0.0, 
+        color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
+        languageStyle='LTR',
+        depth=0.0);
+    instructionsFirstPartButton = keyboard.Keyboard(deviceName='defaultKeyboard')
     
     # --- Initialize components for Routine "routine_instructions" ---
     routineInstructionsText = visual.TextStim(win=win, name='routineInstructionsText',
-        text='Ровно неделю назад Вы предлагали идеи необычного использования для следующего предмета:',
+        text='На предыдущей встрече вы предлагали идеи для этого предмета вместе с партнёром:',
         font='Courier New',
-        pos=(0, 0.15), draggable=False, height=0.05, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
+        pos=(0, 0.20), draggable=False, height=0.04, wrapWidth=1.3, ori=0.0, 
+        color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
         depth=-1.0);
-    coreItemText = visual.TextStim(win=win, name='coreItemText',
-        text='',
+    coreItemText = visual.TextBox2(
+         win, text='', placeholder='Type here...', font='Courier New',
+         ori=0.0, pos=(0, 0.07), draggable=False,      letterHeight=0.06,
+         size=(0.5, 0.5), borderWidth=0.0,
+         color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb',
+         opacity=None,
+         bold=True, italic=False,
+         lineSpacing=1.0, speechPoint=None,
+         padding=0.0, alignment='center',
+         anchor='center', overflow='visible',
+         fillColor=None, borderColor=None,
+         flipHoriz=False, flipVert=False, languageStyle='LTR',
+         editable=False,
+         name='coreItemText',
+         depth=-2, autoLog=False,
+    )
+    participantRoleText = visual.TextStim(win=win, name='participantRoleText',
+        text='Вы выступали в роли:',
         font='Courier New',
-        pos=(0, 0), draggable=False, height=0.06, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
+        pos=(0, -0.10), draggable=False, height=0.04, wrapWidth=None, ori=0.0, 
+        color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
-        depth=-2.0);
+        depth=-3.0);
+    roleText = visual.TextBox2(
+         win, text='', placeholder='Type here...', font='Courier New',
+         ori=0.0, pos=(0, -0.17), draggable=False,      letterHeight=0.06,
+         size=(0.5, 0.5), borderWidth=0.0,
+         color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb',
+         opacity=None,
+         bold=True, italic=False,
+         lineSpacing=1.0, speechPoint=None,
+         padding=0.0, alignment='center',
+         anchor='center', overflow='visible',
+         fillColor=None, borderColor=None,
+         flipHoriz=False, flipVert=False, languageStyle='LTR',
+         editable=False,
+         name='roleText',
+         depth=-4, autoLog=False,
+    )
+    routineInstructionsButtonText = visual.TextStim(win=win, name='routineInstructionsButtonText',
+        text='Нажмите [ПРОБЕЛ] для начала.',
+        font='Courier New',
+        pos=(0, -0.30), draggable=False, height=0.03, wrapWidth=None, ori=0.0, 
+        color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
+        languageStyle='LTR',
+        depth=-5.0);
+    coreItemButton = keyboard.Keyboard(deviceName='defaultKeyboard')
     
-    # --- Initialize components for Routine "show_idea" ---
-    showIdeaText = visual.TextStim(win=win, name='showIdeaText',
-        text='',
-        font='Courier New',
-        pos=(0, 0.15), draggable=False, height=0.06, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
-        languageStyle='LTR',
-        depth=0.0);
+    # --- Initialize components for Routine "item_display" ---
     ideaQuestionText = visual.TextStim(win=win, name='ideaQuestionText',
-        text='Вы помните, что эта идея была озвучена?\n\n[Y] — да     [N] — нет',
+        text='Отметьте именно те идеи, которые, по Вашему мнению, действительно звучали на встрече неделю назад',
         font='Courier New',
-        pos=(0, 0), draggable=False, height=0.035, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
+        pos=(0, 0.40), draggable=False, height=0.05, wrapWidth=1.3, ori=0.0, 
+        color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
         depth=-1.0);
     showIdeaProceedButton = keyboard.Keyboard(deviceName='defaultKeyboard')
     
-    # --- Initialize components for Routine "confidence_evaluation_instruction" ---
-    ceInstructionText = visual.TextStim(win=win, name='ceInstructionText',
-        text='Вам будет предложено оценить, помните ли вы идею\n\nЕсли помните — вы оцените свою уверенность \nв том, кто именно был автором идеи. ',
-        font='Courier New',
-        pos=(0, 0.21), draggable=False, height=0.05, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
-        languageStyle='LTR',
-        depth=-1.0);
-    ceInstructionHint = visual.TextStim(win=win, name='ceInstructionHint',
-        text='Нажмите [Д] — «да, помню»\nНажмите [Н] — «нет, не помню»',
-        font='Courier New',
-        pos=(0, -0.1), draggable=False, height=0.035, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
-        languageStyle='LTR',
-        depth=-2.0);
-    ceInstructionButtonText = visual.TextStim(win=win, name='ceInstructionButtonText',
-        text='Чтобы продолжить, нажмите ПРОБЕЛ',
-        font='Courier New',
-        pos=(0, -0.2), draggable=False, height=0.05, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
-        languageStyle='LTR',
-        depth=-3.0);
-    ceInstructionProceedButton = keyboard.Keyboard(deviceName='defaultKeyboard')
-    
     # --- Initialize components for Routine "confidence_evaluation" ---
     confidenceText = visual.TextStim(win=win, name='confidenceText',
-        text='Насколько вы уверены, что эту идею предложил именно партнёр, а не она была заимствована из другой идеи?',
+        text='Насколько вы уверены в том, что именно Ваш партнер является автором данной идеи?',
         font='Courier New',
-        pos=(0, 0.1), draggable=False, height=0.05, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
+        pos=(0, 0.30), draggable=False, height=0.04, wrapWidth=1.3, ori=0.0, 
+        color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
-        depth=-1.0);
+        depth=0.0);
+    confidenceIdeaText = visual.TextBox2(
+         win, text='...', placeholder='Type here...', font='Courier New',
+         ori=0.0, pos=(0, 0.10), draggable=False,      letterHeight=0.05,
+         size=(1.3, 0.5), borderWidth=0.0,
+         color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb',
+         opacity=None,
+         bold=True, italic=False,
+         lineSpacing=1.0, speechPoint=None,
+         padding=0.0, alignment='center',
+         anchor='center', overflow='visible',
+         fillColor=None, borderColor=None,
+         flipHoriz=False, flipVert=False, languageStyle='LTR',
+         editable=False,
+         name='confidenceIdeaText',
+         depth=-1, autoLog=False,
+    )
     confidenceTextHint = visual.TextStim(win=win, name='confidenceTextHint',
-        text='0% — точно заимствована     100% — точно его/её идея',
+        text='0% — Идея, навеянная другой идеей      100% — Точно оригинальная идея',
         font='Courier New',
-        pos=(0, -0.07), draggable=False, height=0.035, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
+        pos=(0, -0.07), draggable=False, height=0.03, wrapWidth=1.8, ori=0.0, 
+        color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
-        depth=-2.0);
+        depth=-3.0);
     confidenceSlider = visual.Slider(win=win, name='confidenceSlider',
         startValue=None, size=(1.0, 0.06), pos=(0, -0.25), units=win.units,
         labels=('0%', '50%', '100%'), ticks=(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100), granularity=0.0,
         style='rating', styleTweaks=[], opacity=None,
         labelColor='LightGray', markerColor=(-0.4353, -0.5216, 0.0902), lineColor=(0.6000, 0.6941, 0.8510), colorSpace='rgb',
         font='Courier New', labelHeight=0.05,
-        flip=False, ori=0.0, depth=-3, readOnly=False)
+        flip=False, ori=0.0, depth=-4, readOnly=False)
     buttonText = visual.TextStim(win=win, name='buttonText',
         text='Нажмите ENTER для подтверждения',
         font='Courier New',
         pos=(0, -0.4), draggable=False, height=0.035, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
+        color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
-        depth=-4.0);
+        depth=-5.0);
     confidenceProceedButton = keyboard.Keyboard(deviceName='defaultKeyboard')
     
+    # --- Initialize components for Routine "prepare_source_routine" ---
+    
     # --- Initialize components for Routine "source_evaluation" ---
+    sourceIdeaLabel = visual.TextBox2(
+         win, text='...', placeholder='Type here...', font='Courier New',
+         ori=0.0, pos=(0, 0.30), draggable=False,      letterHeight=0.05,
+         size=(1.3, 0.5), borderWidth=0.0,
+         color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb',
+         opacity=None,
+         bold=True, italic=False,
+         lineSpacing=1.0, speechPoint=None,
+         padding=0.0, alignment='center',
+         anchor='center', overflow='visible',
+         fillColor=None, borderColor=None,
+         flipHoriz=False, flipVert=False, languageStyle='LTR',
+         editable=False,
+         name='sourceIdeaLabel',
+         depth=0, autoLog=False,
+    )
     sourceEvaluationText = visual.TextStim(win=win, name='sourceEvaluationText',
-        text='Вы указали, что эта идея, вероятно, была заимствована.\n\nОпишите, из какой идеи, по вашему мнению, она была взята:',
+        text='Вы отметили, что эта идея, по вашему мнению,  была навеяна другой идеей из обсуждения.\n \nОпишите, какая идея, на ваш взгляд, могла послужить для неё отправной точкой:',
         font='Courier New',
-        pos=(0, 0.25), draggable=False, height=0.05, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
+        pos=(0, 0.15), draggable=False, height=0.04, wrapWidth=1.3, ori=0.0, 
+        color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
         depth=-1.0);
     sourceEvaluationTextBox = visual.TextBox2(
          win, text=None, placeholder='Введите ваш ответ здесь...', font='Courier New',
          ori=0.0, pos=(0, -0.15), draggable=False,      letterHeight=0.05,
          size=(1.4, 0.2), borderWidth=1.0,
-         color='black', colorSpace='rgb',
+         color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb',
          opacity=None,
          bold=False, italic=False,
          lineSpacing=1.0, speechPoint=None,
@@ -492,17 +616,15 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     sourceButtonText = visual.TextStim(win=win, name='sourceButtonText',
         text='Нажмите ENTER для подтверждения',
         font='Courier New',
-        pos=(0, -0.4), draggable=False, height=0.035, wrapWidth=None, ori=0.0, 
-        color='black', colorSpace='rgb', opacity=None, 
+        pos=(0, -0.4), draggable=False, height=0.035, wrapWidth=1.3, ori=0.0, 
+        color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
         depth=-3.0);
     sourceEvaluationButton = keyboard.Keyboard(deviceName='defaultKeyboard')
     
-    # --- Initialize components for Routine "save_routine" ---
-    
     # --- Initialize components for Routine "thank_you" ---
     thankYouText = visual.TextStim(win=win, name='thankYouText',
-        text='Спасибо, участник))))',
+        text='Благодарим за участие!',
         font='Courier New',
         pos=(0, 0), draggable=False, height=0.06, wrapWidth=None, ori=0.0, 
         color='black', colorSpace='rgb', opacity=None, 
@@ -539,19 +661,103 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         format='%Y-%m-%d %Hh%M.%S.%f %z', fractionalSecondDigits=6
     )
     
+    # --- Prepare to start Routine "startup_routine" ---
+    # create an object to store info about Routine startup_routine
+    startup_routine = data.Routine(
+        name='startup_routine',
+        components=[],
+    )
+    startup_routine.status = NOT_STARTED
+    continueRoutine = True
+    # update component parameters for each repeat
+    # store start times for startup_routine
+    startup_routine.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
+    startup_routine.tStart = globalClock.getTime(format='float')
+    startup_routine.status = STARTED
+    startup_routine.maxDuration = None
+    # keep track of which components have finished
+    startup_routineComponents = startup_routine.components
+    for thisComponent in startup_routine.components:
+        thisComponent.tStart = None
+        thisComponent.tStop = None
+        thisComponent.tStartRefresh = None
+        thisComponent.tStopRefresh = None
+        if hasattr(thisComponent, 'status'):
+            thisComponent.status = NOT_STARTED
+    # reset timers
+    t = 0
+    _timeToFirstFrame = win.getFutureFlipTime(clock="now")
+    frameN = -1
+    
+    # --- Run Routine "startup_routine" ---
+    thisExp.currentRoutine = startup_routine
+    startup_routine.forceEnded = routineForceEnded = not continueRoutine
+    while continueRoutine:
+        # get current time
+        t = routineTimer.getTime()
+        tThisFlip = win.getFutureFlipTime(clock=routineTimer)
+        tThisFlipGlobal = win.getFutureFlipTime(clock=None)
+        frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
+        # update/draw components on each frame
+        
+        # check for quit (typically the Esc key)
+        if defaultKeyboard.getKeys(keyList=["escape"]):
+            thisExp.status = FINISHED
+        if thisExp.status == FINISHED or endExpNow:
+            endExperiment(thisExp, win=win)
+            return
+        # pause experiment here if requested
+        if thisExp.status == PAUSED:
+            pauseExperiment(
+                thisExp=thisExp, 
+                win=win, 
+                timers=[routineTimer, globalClock], 
+                currentRoutine=startup_routine,
+            )
+            # skip the frame we paused on
+            continue
+        
+        # has a Component requested the Routine to end?
+        if not continueRoutine:
+            startup_routine.forceEnded = routineForceEnded = True
+        # has the Routine been forcibly ended?
+        if startup_routine.forceEnded or routineForceEnded:
+            break
+        # has every Component finished?
+        continueRoutine = False
+        for thisComponent in startup_routine.components:
+            if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+                continueRoutine = True
+                break  # at least one component has not yet finished
+        
+        # refresh the screen
+        if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
+            win.flip()
+    
+    # --- Ending Routine "startup_routine" ---
+    for thisComponent in startup_routine.components:
+        if hasattr(thisComponent, "setAutoDraw"):
+            thisComponent.setAutoDraw(False)
+    # store stop times for startup_routine
+    startup_routine.tStop = globalClock.getTime(format='float')
+    startup_routine.tStopRefresh = tThisFlipGlobal
+    thisExp.nextEntry()
+    # the Routine "startup_routine" was not non-slip safe, so reset the non-slip timer
+    routineTimer.reset()
+    
     # --- Prepare to start Routine "instructions" ---
     # create an object to store info about Routine instructions
     instructions = data.Routine(
         name='instructions',
-        components=[inastructionText, proceedKey],
+        components=[inastructionText, instructionsButton],
     )
     instructions.status = NOT_STARTED
     continueRoutine = True
     # update component parameters for each repeat
-    # create starting attributes for proceedKey
-    proceedKey.keys = []
-    proceedKey.rt = []
-    _proceedKey_allKeys = []
+    # create starting attributes for instructionsButton
+    instructionsButton.keys = []
+    instructionsButton.rt = []
+    _instructionsButton_allKeys = []
     # store start times for instructions
     instructions.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
     instructions.tStart = globalClock.getTime(format='float')
@@ -600,26 +806,26 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             # update params
             pass
         
-        # *proceedKey* updates
+        # *instructionsButton* updates
         
-        # if proceedKey is starting this frame...
-        if proceedKey.status == NOT_STARTED and t >= 0.0-frameTolerance:
+        # if instructionsButton is starting this frame...
+        if instructionsButton.status == NOT_STARTED and t >= 0.0-frameTolerance:
             # keep track of start time/frame for later
-            proceedKey.frameNStart = frameN  # exact frame index
-            proceedKey.tStart = t  # local t and not account for scr refresh
-            proceedKey.tStartRefresh = tThisFlipGlobal  # on global time
-            win.timeOnFlip(proceedKey, 'tStartRefresh')  # time at next scr refresh
+            instructionsButton.frameNStart = frameN  # exact frame index
+            instructionsButton.tStart = t  # local t and not account for scr refresh
+            instructionsButton.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(instructionsButton, 'tStartRefresh')  # time at next scr refresh
             # update status
-            proceedKey.status = STARTED
+            instructionsButton.status = STARTED
             # keyboard checking is just starting
-            proceedKey.clock.reset()  # now t=0
-        if proceedKey.status == STARTED:
-            theseKeys = proceedKey.getKeys(keyList=['space'], ignoreKeys=["escape"], waitRelease=False)
-            _proceedKey_allKeys.extend(theseKeys)
-            if len(_proceedKey_allKeys):
-                proceedKey.keys = _proceedKey_allKeys[-1].name  # just the last key pressed
-                proceedKey.rt = _proceedKey_allKeys[-1].rt
-                proceedKey.duration = _proceedKey_allKeys[-1].duration
+            instructionsButton.clock.reset()  # now t=0
+        if instructionsButton.status == STARTED:
+            theseKeys = instructionsButton.getKeys(keyList=['space'], ignoreKeys=["escape"], waitRelease=False)
+            _instructionsButton_allKeys.extend(theseKeys)
+            if len(_instructionsButton_allKeys):
+                instructionsButton.keys = _instructionsButton_allKeys[-1].name  # just the last key pressed
+                instructionsButton.rt = _instructionsButton_allKeys[-1].rt
+                instructionsButton.duration = _instructionsButton_allKeys[-1].duration
                 # a response ends the routine
                 continueRoutine = False
         
@@ -668,14 +874,143 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     # the Routine "instructions" was not non-slip safe, so reset the non-slip timer
     routineTimer.reset()
     
+    # --- Prepare to start Routine "instructions_part_1" ---
+    # create an object to store info about Routine instructions_part_1
+    instructions_part_1 = data.Routine(
+        name='instructions_part_1',
+        components=[insructionFirstPartText, instructionsFirstPartButton],
+    )
+    instructions_part_1.status = NOT_STARTED
+    continueRoutine = True
+    # update component parameters for each repeat
+    # create starting attributes for instructionsFirstPartButton
+    instructionsFirstPartButton.keys = []
+    instructionsFirstPartButton.rt = []
+    _instructionsFirstPartButton_allKeys = []
+    # store start times for instructions_part_1
+    instructions_part_1.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
+    instructions_part_1.tStart = globalClock.getTime(format='float')
+    instructions_part_1.status = STARTED
+    instructions_part_1.maxDuration = None
+    # keep track of which components have finished
+    instructions_part_1Components = instructions_part_1.components
+    for thisComponent in instructions_part_1.components:
+        thisComponent.tStart = None
+        thisComponent.tStop = None
+        thisComponent.tStartRefresh = None
+        thisComponent.tStopRefresh = None
+        if hasattr(thisComponent, 'status'):
+            thisComponent.status = NOT_STARTED
+    # reset timers
+    t = 0
+    _timeToFirstFrame = win.getFutureFlipTime(clock="now")
+    frameN = -1
+    
+    # --- Run Routine "instructions_part_1" ---
+    thisExp.currentRoutine = instructions_part_1
+    instructions_part_1.forceEnded = routineForceEnded = not continueRoutine
+    while continueRoutine:
+        # get current time
+        t = routineTimer.getTime()
+        tThisFlip = win.getFutureFlipTime(clock=routineTimer)
+        tThisFlipGlobal = win.getFutureFlipTime(clock=None)
+        frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
+        # update/draw components on each frame
+        
+        # *insructionFirstPartText* updates
+        
+        # if insructionFirstPartText is starting this frame...
+        if insructionFirstPartText.status == NOT_STARTED and t >= 0.0-frameTolerance:
+            # keep track of start time/frame for later
+            insructionFirstPartText.frameNStart = frameN  # exact frame index
+            insructionFirstPartText.tStart = t  # local t and not account for scr refresh
+            insructionFirstPartText.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(insructionFirstPartText, 'tStartRefresh')  # time at next scr refresh
+            # update status
+            insructionFirstPartText.status = STARTED
+            insructionFirstPartText.setAutoDraw(True)
+        
+        # if insructionFirstPartText is active this frame...
+        if insructionFirstPartText.status == STARTED:
+            # update params
+            pass
+        
+        # *instructionsFirstPartButton* updates
+        
+        # if instructionsFirstPartButton is starting this frame...
+        if instructionsFirstPartButton.status == NOT_STARTED and t >= 0.0-frameTolerance:
+            # keep track of start time/frame for later
+            instructionsFirstPartButton.frameNStart = frameN  # exact frame index
+            instructionsFirstPartButton.tStart = t  # local t and not account for scr refresh
+            instructionsFirstPartButton.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(instructionsFirstPartButton, 'tStartRefresh')  # time at next scr refresh
+            # update status
+            instructionsFirstPartButton.status = STARTED
+            # keyboard checking is just starting
+            instructionsFirstPartButton.clock.reset()  # now t=0
+        if instructionsFirstPartButton.status == STARTED:
+            theseKeys = instructionsFirstPartButton.getKeys(keyList=['space'], ignoreKeys=["escape"], waitRelease=False)
+            _instructionsFirstPartButton_allKeys.extend(theseKeys)
+            if len(_instructionsFirstPartButton_allKeys):
+                instructionsFirstPartButton.keys = _instructionsFirstPartButton_allKeys[-1].name  # just the last key pressed
+                instructionsFirstPartButton.rt = _instructionsFirstPartButton_allKeys[-1].rt
+                instructionsFirstPartButton.duration = _instructionsFirstPartButton_allKeys[-1].duration
+                # a response ends the routine
+                continueRoutine = False
+        
+        # check for quit (typically the Esc key)
+        if defaultKeyboard.getKeys(keyList=["escape"]):
+            thisExp.status = FINISHED
+        if thisExp.status == FINISHED or endExpNow:
+            endExperiment(thisExp, win=win)
+            return
+        # pause experiment here if requested
+        if thisExp.status == PAUSED:
+            pauseExperiment(
+                thisExp=thisExp, 
+                win=win, 
+                timers=[routineTimer, globalClock], 
+                currentRoutine=instructions_part_1,
+            )
+            # skip the frame we paused on
+            continue
+        
+        # has a Component requested the Routine to end?
+        if not continueRoutine:
+            instructions_part_1.forceEnded = routineForceEnded = True
+        # has the Routine been forcibly ended?
+        if instructions_part_1.forceEnded or routineForceEnded:
+            break
+        # has every Component finished?
+        continueRoutine = False
+        for thisComponent in instructions_part_1.components:
+            if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+                continueRoutine = True
+                break  # at least one component has not yet finished
+        
+        # refresh the screen
+        if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
+            win.flip()
+    
+    # --- Ending Routine "instructions_part_1" ---
+    for thisComponent in instructions_part_1.components:
+        if hasattr(thisComponent, "setAutoDraw"):
+            thisComponent.setAutoDraw(False)
+    # store stop times for instructions_part_1
+    instructions_part_1.tStop = globalClock.getTime(format='float')
+    instructions_part_1.tStopRefresh = tThisFlipGlobal
+    thisExp.nextEntry()
+    # the Routine "instructions_part_1" was not non-slip safe, so reset the non-slip timer
+    routineTimer.reset()
+    
     # set up handler to look after randomisation of conditions etc
     trials = data.TrialHandler2(
         name='trials',
-        nReps=1, 
+        nReps=totalIdeas, 
         method='sequential', 
         extraInfo=expInfo, 
         originPath=-1, 
-        trialList=data.importConditions(stimuliPath), 
+        trialList=[None], 
         seed=None, 
         isTrials=True, 
     )
@@ -707,20 +1042,53 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         # create an object to store info about Routine routine_instructions
         routine_instructions = data.Routine(
             name='routine_instructions',
-            components=[routineInstructionsText, coreItemText],
+            components=[routineInstructionsText, coreItemText, participantRoleText, roleText, routineInstructionsButtonText, coreItemButton],
         )
         routine_instructions.status = NOT_STARTED
         continueRoutine = True
         # update component parameters for each repeat
-        # Run 'Begin Routine' code from onCoreItemChange
-        currentCoreItem = ideaCore
+        # Run 'Begin Routine' code from getIdeaData
+        currentIndex = currentLoop.thisN
+        ideaData = allIdeas[currentIndex]
+        currentRole = ideaData['blockType']
         
-        if currentCoreItem == prevCoreItem:
+        currentIdeas = []
+        for i in range(1, 21):
+            key = f'idea_{i}'
+            val = ideaData.get(key, '').strip()
+            if val:
+                currentIdeas.append(val)
+        
+        currentIdeasObs = []
+        if currentRole == 'observation':
+            for i in range(1, 21):
+                val = ideaData.get(f'idea_b_{i}', '').strip()
+                if val:
+                    currentIdeasObs.append(val)
+        
+        rememberedIdeas = []
+        confidenceScores = {}
+        sourceTexts = {}
+        coreItemText.reset()
+        coreItemText.setText(currentBaseItem)
+        roleText.reset()
+        roleText.setText(currentRole)
+        # create starting attributes for coreItemButton
+        coreItemButton.keys = []
+        coreItemButton.rt = []
+        _coreItemButton_allKeys = []
+        # Run 'Begin Routine' code from onBaseItemChange
+        currentIndex = currentLoop.thisN
+        ideaData = allIdeas[currentIndex]
+        
+        currentBaseItem = ideaData['baseItem']
+        currentRole = ideaData['blockType']
+        
+        if currentBaseItem == prevBaseItem and currentRole == prevRole:
             continueRoutine = False
         else:
-            print(f'{currentCoreItem}')
-            coreItemText.text = (f'{currentCoreItem}')
-        coreItemText.setText(currentCoreItem)
+            coreItemText.text = f'{currentBaseItem}'
+            roleText.text = 'Наблюдатель' if currentRole == 'observation' else 'Генератор идей'
         # store start times for routine_instructions
         routine_instructions.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
         routine_instructions.tStart = globalClock.getTime(format='float')
@@ -743,7 +1111,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         # --- Run Routine "routine_instructions" ---
         thisExp.currentRoutine = routine_instructions
         routine_instructions.forceEnded = routineForceEnded = not continueRoutine
-        while continueRoutine and routineTimer.getTime() < 5.0:
+        while continueRoutine:
             # if trial has changed, end Routine now
             if hasattr(thisTrial, 'status') and thisTrial.status == STOPPING:
                 continueRoutine = False
@@ -772,18 +1140,6 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                 # update params
                 pass
             
-            # if routineInstructionsText is stopping this frame...
-            if routineInstructionsText.status == STARTED:
-                # is it time to stop? (based on global clock, using actual start)
-                if tThisFlipGlobal > routineInstructionsText.tStartRefresh + 5-frameTolerance:
-                    # keep track of stop time/frame for later
-                    routineInstructionsText.tStop = t  # not accounting for scr refresh
-                    routineInstructionsText.tStopRefresh = tThisFlipGlobal  # on global time
-                    routineInstructionsText.frameNStop = frameN  # exact frame index
-                    # update status
-                    routineInstructionsText.status = FINISHED
-                    routineInstructionsText.setAutoDraw(False)
-            
             # *coreItemText* updates
             
             # if coreItemText is starting this frame...
@@ -802,17 +1158,82 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                 # update params
                 pass
             
-            # if coreItemText is stopping this frame...
-            if coreItemText.status == STARTED:
-                # is it time to stop? (based on global clock, using actual start)
-                if tThisFlipGlobal > coreItemText.tStartRefresh + 5-frameTolerance:
-                    # keep track of stop time/frame for later
-                    coreItemText.tStop = t  # not accounting for scr refresh
-                    coreItemText.tStopRefresh = tThisFlipGlobal  # on global time
-                    coreItemText.frameNStop = frameN  # exact frame index
-                    # update status
-                    coreItemText.status = FINISHED
-                    coreItemText.setAutoDraw(False)
+            # *participantRoleText* updates
+            
+            # if participantRoleText is starting this frame...
+            if participantRoleText.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                # keep track of start time/frame for later
+                participantRoleText.frameNStart = frameN  # exact frame index
+                participantRoleText.tStart = t  # local t and not account for scr refresh
+                participantRoleText.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(participantRoleText, 'tStartRefresh')  # time at next scr refresh
+                # update status
+                participantRoleText.status = STARTED
+                participantRoleText.setAutoDraw(True)
+            
+            # if participantRoleText is active this frame...
+            if participantRoleText.status == STARTED:
+                # update params
+                pass
+            
+            # *roleText* updates
+            
+            # if roleText is starting this frame...
+            if roleText.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                # keep track of start time/frame for later
+                roleText.frameNStart = frameN  # exact frame index
+                roleText.tStart = t  # local t and not account for scr refresh
+                roleText.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(roleText, 'tStartRefresh')  # time at next scr refresh
+                # update status
+                roleText.status = STARTED
+                roleText.setAutoDraw(True)
+            
+            # if roleText is active this frame...
+            if roleText.status == STARTED:
+                # update params
+                pass
+            
+            # *routineInstructionsButtonText* updates
+            
+            # if routineInstructionsButtonText is starting this frame...
+            if routineInstructionsButtonText.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                # keep track of start time/frame for later
+                routineInstructionsButtonText.frameNStart = frameN  # exact frame index
+                routineInstructionsButtonText.tStart = t  # local t and not account for scr refresh
+                routineInstructionsButtonText.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(routineInstructionsButtonText, 'tStartRefresh')  # time at next scr refresh
+                # update status
+                routineInstructionsButtonText.status = STARTED
+                routineInstructionsButtonText.setAutoDraw(True)
+            
+            # if routineInstructionsButtonText is active this frame...
+            if routineInstructionsButtonText.status == STARTED:
+                # update params
+                pass
+            
+            # *coreItemButton* updates
+            
+            # if coreItemButton is starting this frame...
+            if coreItemButton.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                # keep track of start time/frame for later
+                coreItemButton.frameNStart = frameN  # exact frame index
+                coreItemButton.tStart = t  # local t and not account for scr refresh
+                coreItemButton.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(coreItemButton, 'tStartRefresh')  # time at next scr refresh
+                # update status
+                coreItemButton.status = STARTED
+                # keyboard checking is just starting
+                coreItemButton.clock.reset()  # now t=0
+            if coreItemButton.status == STARTED:
+                theseKeys = coreItemButton.getKeys(keyList=['space'], ignoreKeys=["escape"], waitRelease=False)
+                _coreItemButton_allKeys.extend(theseKeys)
+                if len(_coreItemButton_allKeys):
+                    coreItemButton.keys = _coreItemButton_allKeys[-1].name  # just the last key pressed
+                    coreItemButton.rt = _coreItemButton_allKeys[-1].rt
+                    coreItemButton.duration = _coreItemButton_allKeys[-1].duration
+                    # a response ends the routine
+                    continueRoutine = False
             
             # check for quit (typically the Esc key)
             if defaultKeyboard.getKeys(keyList=["escape"]):
@@ -855,38 +1276,83 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         # store stop times for routine_instructions
         routine_instructions.tStop = globalClock.getTime(format='float')
         routine_instructions.tStopRefresh = tThisFlipGlobal
-        # Run 'End Routine' code from onCoreItemChange
-        prevCoreItem = currentCoreItem
-        # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
-        if routine_instructions.maxDurationReached:
-            routineTimer.addTime(-routine_instructions.maxDuration)
-        elif routine_instructions.forceEnded:
-            routineTimer.reset()
-        else:
-            routineTimer.addTime(-5.000000)
+        # Run 'End Routine' code from onBaseItemChange
+        prevBaseItem = currentBaseItem
+        prevRole = currentRole
+        # the Routine "routine_instructions" was not non-slip safe, so reset the non-slip timer
+        routineTimer.reset()
         
-        # --- Prepare to start Routine "show_idea" ---
-        # create an object to store info about Routine show_idea
-        show_idea = data.Routine(
-            name='show_idea',
-            components=[showIdeaText, ideaQuestionText, showIdeaProceedButton],
+        # --- Prepare to start Routine "item_display" ---
+        # create an object to store info about Routine item_display
+        item_display = data.Routine(
+            name='item_display',
+            components=[ideaQuestionText, showIdeaProceedButton],
         )
-        show_idea.status = NOT_STARTED
+        item_display.status = NOT_STARTED
         continueRoutine = True
         # update component parameters for each repeat
-        showIdeaText.setText(ideaText)
+        # Run 'Begin Routine' code from getCurrentIdeas
+        currentIndex = currentLoop.thisN
+        ideaData = allIdeas[currentIndex]
+        
+        print('[getCurrentIdeas] Загружены следующие идеи для участника:', currentIdeas, currentIdeasObs if len(currentIdeasObs) > 0 else '')
+        
+        isObserver = (currentRole == 'observation')
+        selected = [False] * len(currentIdeas)
+        selectedObs = [False] * len(currentIdeasObs)
+        wasPressed = False
+        
+        if isObserver:
+            for i, stim in enumerate(ideaStims):
+                stim.pos = (-0.7, 0.15 - i * 0.08)
+                stim.wrapWidth = 0.75
+                if i < len(currentIdeas):
+                    stim.text = f'{i+1}. {currentIdeas[i]}'
+                    stim.opacity = 1.0
+                else:
+                    stim.text = ''
+                    stim.opacity = 0.0
+        
+            for i, stim in enumerate(ideaStimsObs):
+                if i < len(currentIdeasObs):
+                    stim.text = f'{i+1}. {currentIdeasObs[i]}'
+                    stim.opacity = 1.0
+                else:
+                    stim.text = ''
+                    stim.opacity = 0.0
+        
+        else:
+            for i, stim in enumerate(ideaStims):
+                stim.pos = (-0.35, 0.15 - i * 0.08)
+                stim.wrapWidth = 1.1
+                if i < len(currentIdeas):
+                    stim.text = f'{i+1}. {currentIdeas[i]}'
+                    stim.opacity = 1.0
+                else:
+                    stim.text = ''
+                    stim.opacity = 0.0
+        
+            for stim in ideaStimsObs:
+                stim.text = ''
+                stim.opacity = 0.0
+        
+        
+        selectionMouse.clickReset()
+        
+        currentSource = ideaData['sourceParticipant']
+        currentBlockType = ideaData['blockType']
         # create starting attributes for showIdeaProceedButton
         showIdeaProceedButton.keys = []
         showIdeaProceedButton.rt = []
         _showIdeaProceedButton_allKeys = []
-        # store start times for show_idea
-        show_idea.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
-        show_idea.tStart = globalClock.getTime(format='float')
-        show_idea.status = STARTED
-        show_idea.maxDuration = None
+        # store start times for item_display
+        item_display.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
+        item_display.tStart = globalClock.getTime(format='float')
+        item_display.status = STARTED
+        item_display.maxDuration = None
         # keep track of which components have finished
-        show_ideaComponents = show_idea.components
-        for thisComponent in show_idea.components:
+        item_displayComponents = item_display.components
+        for thisComponent in item_display.components:
             thisComponent.tStart = None
             thisComponent.tStop = None
             thisComponent.tStartRefresh = None
@@ -898,9 +1364,9 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         _timeToFirstFrame = win.getFutureFlipTime(clock="now")
         frameN = -1
         
-        # --- Run Routine "show_idea" ---
-        thisExp.currentRoutine = show_idea
-        show_idea.forceEnded = routineForceEnded = not continueRoutine
+        # --- Run Routine "item_display" ---
+        thisExp.currentRoutine = item_display
+        item_display.forceEnded = routineForceEnded = not continueRoutine
         while continueRoutine:
             # if trial has changed, end Routine now
             if hasattr(thisTrial, 'status') and thisTrial.status == STOPPING:
@@ -911,24 +1377,46 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             tThisFlipGlobal = win.getFutureFlipTime(clock=None)
             frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
             # update/draw components on each frame
+            # Run 'Each Frame' code from getCurrentIdeas
+            buttons, times = selectionMouse.getPressed(getTime=True)
             
-            # *showIdeaText* updates
+            if buttons[0]:
+                if not wasPressed:
+                    wasPressed = True
+                    mousePos = selectionMouse.getPos()
             
-            # if showIdeaText is starting this frame...
-            if showIdeaText.status == NOT_STARTED and t >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                showIdeaText.frameNStart = frameN  # exact frame index
-                showIdeaText.tStart = t  # local t and not account for scr refresh
-                showIdeaText.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(showIdeaText, 'tStartRefresh')  # time at next scr refresh
-                # update status
-                showIdeaText.status = STARTED
-                showIdeaText.setAutoDraw(True)
+                    for i, stim in enumerate(ideaStims):
+                        if i < len(currentIdeas) and stim.opacity > 0:
+                            if stim.boundingBox is not None:
+                                if stim.contains(mousePos):
+                                    selected[i] = not selected[i]
+                    if isObserver:
+                        for i, stim in enumerate(ideaStimsObs):
+                            if i < len(currentIdeasObs) and stim.opacity > 0:
+                                if stim.contains(mousePos):
+                                    selectedObs[i] = not selectedObs[i]
             
-            # if showIdeaText is active this frame...
-            if showIdeaText.status == STARTED:
-                # update params
-                pass
+                    if nextButton.contains(mousePos):
+                        continueRoutine = False
+            
+            else:
+                wasPressed = False
+            
+            for i, stim in enumerate(ideaStims):
+                if i < len(currentIdeas):
+                    stim.color = '#00c853' if selected[i] else '#090521'
+                stim.draw()
+            
+            if isObserver:
+                headerLeft.draw()
+                headerRight.draw()
+                for i, stim in enumerate(ideaStimsObs):
+                    if stim.opacity > 0:
+                        stim.color = '#00c853' if (i < len(selectedObs) and selectedObs[i]) else '#090521'
+                    stim.draw()
+            
+            nextButton.draw()
+            nextButtonText.draw()
             
             # *ideaQuestionText* updates
             
@@ -983,20 +1471,20 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                     thisExp=thisExp, 
                     win=win, 
                     timers=[routineTimer, globalClock], 
-                    currentRoutine=show_idea,
+                    currentRoutine=item_display,
                 )
                 # skip the frame we paused on
                 continue
             
             # has a Component requested the Routine to end?
             if not continueRoutine:
-                show_idea.forceEnded = routineForceEnded = True
+                item_display.forceEnded = routineForceEnded = True
             # has the Routine been forcibly ended?
-            if show_idea.forceEnded or routineForceEnded:
+            if item_display.forceEnded or routineForceEnded:
                 break
             # has every Component finished?
             continueRoutine = False
-            for thisComponent in show_idea.components:
+            for thisComponent in item_display.components:
                 if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
                     continueRoutine = True
                     break  # at least one component has not yet finished
@@ -1005,20 +1493,45 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
                 win.flip()
         
-        # --- Ending Routine "show_idea" ---
-        for thisComponent in show_idea.components:
+        # --- Ending Routine "item_display" ---
+        for thisComponent in item_display.components:
             if hasattr(thisComponent, "setAutoDraw"):
                 thisComponent.setAutoDraw(False)
-        # store stop times for show_idea
-        show_idea.tStop = globalClock.getTime(format='float')
-        show_idea.tStopRefresh = tThisFlipGlobal
-        # check responses
-        if showIdeaProceedButton.keys in ['', [], None]:  # No response was made
-            showIdeaProceedButton.keys = None
-        trials.addData('showIdeaProceedButton.keys',showIdeaProceedButton.keys)
-        if showIdeaProceedButton.keys != None:  # we had a response
-            trials.addData('showIdeaProceedButton.rt', showIdeaProceedButton.rt)
-            trials.addData('showIdeaProceedButton.duration', showIdeaProceedButton.duration)
+        # store stop times for item_display
+        item_display.tStop = globalClock.getTime(format='float')
+        item_display.tStopRefresh = tThisFlipGlobal
+        # Run 'End Routine' code from getCurrentIdeas
+        rememberedIdeas = [
+            currentIdeas[i]
+            for i in range(len(currentIdeas))
+            if selected[i]
+        ]
+        
+        if isObserver:
+            rememberedIdeas += [
+                currentIdeasObs[i]
+                for i in range(len(currentIdeasObs))
+                if selectedObs[i]
+            ]
+        
+        for i, idea in enumerate(currentIdeas):
+            thisExp.addData(f'list_{trials.thisN+1}_idea_{i+1}', idea)
+            thisExp.addData(
+                f'list_{trials.thisN+1}_remembered_{i+1}',
+                'yes' if selected[i] else 'no'
+            )
+        
+        if isObserver:
+            for i, idea in enumerate(currentIdeasObs):
+                thisExp.addData(f'list_{trials.thisN+1}_idea_b_{i+1}', idea)
+                thisExp.addData(
+                    f'list_{trials.thisN+1}_remembered_b_{i+1}',
+                    'yes' if selectedObs[i] else 'no'
+                )
+        
+        confidenceIndex = 0
+        
+        print('[pushToArr] Участник отметил следующие идеи:',rememberedIdeas)
         # Run 'End Routine' code from storeResponseKey
         response = showIdeaProceedButton.keys
         if response == 'n':
@@ -1028,615 +1541,325 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             skipConfidence = False
             skipSource = False
         
-        print(skipConfidence, skipSource, response)
-        
+        thisExp.addData('sourceParticipant', currentSource)
+        thisExp.addData('blockType', currentBlockType)
         thisExp.addData('remembered', response)
-        # the Routine "show_idea" was not non-slip safe, so reset the non-slip timer
+        # the Routine "item_display" was not non-slip safe, so reset the non-slip timer
         routineTimer.reset()
         
-        # --- Prepare to start Routine "confidence_evaluation_instruction" ---
-        # create an object to store info about Routine confidence_evaluation_instruction
-        confidence_evaluation_instruction = data.Routine(
-            name='confidence_evaluation_instruction',
-            components=[ceInstructionText, ceInstructionHint, ceInstructionButtonText, ceInstructionProceedButton],
+        # set up handler to look after randomisation of conditions etc
+        confidence_loop = data.TrialHandler2(
+            name='confidence_loop',
+            nReps=len(rememberedIdeas), 
+            method='sequential', 
+            extraInfo=expInfo, 
+            originPath=-1, 
+            trialList=[None], 
+            seed=None, 
+            isTrials=True, 
         )
-        confidence_evaluation_instruction.status = NOT_STARTED
-        continueRoutine = True
-        # update component parameters for each repeat
-        # Run 'Begin Routine' code from showOnce
-        if ceInstructionCount >= 1 or skipConfidence or skipSource:
-            continueRoutine = False
-        else: 
-            ceInstructionCount += 1
-        # create starting attributes for ceInstructionProceedButton
-        ceInstructionProceedButton.keys = []
-        ceInstructionProceedButton.rt = []
-        _ceInstructionProceedButton_allKeys = []
-        # store start times for confidence_evaluation_instruction
-        confidence_evaluation_instruction.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
-        confidence_evaluation_instruction.tStart = globalClock.getTime(format='float')
-        confidence_evaluation_instruction.status = STARTED
-        confidence_evaluation_instruction.maxDuration = None
-        # keep track of which components have finished
-        confidence_evaluation_instructionComponents = confidence_evaluation_instruction.components
-        for thisComponent in confidence_evaluation_instruction.components:
-            thisComponent.tStart = None
-            thisComponent.tStop = None
-            thisComponent.tStartRefresh = None
-            thisComponent.tStopRefresh = None
-            if hasattr(thisComponent, 'status'):
-                thisComponent.status = NOT_STARTED
-        # reset timers
-        t = 0
-        _timeToFirstFrame = win.getFutureFlipTime(clock="now")
-        frameN = -1
+        thisExp.addLoop(confidence_loop)  # add the loop to the experiment
+        thisConfidence_loop = confidence_loop.trialList[0]  # so we can initialise stimuli with some values
+        # abbreviate parameter names if possible (e.g. rgb = thisConfidence_loop.rgb)
+        if thisConfidence_loop != None:
+            for paramName in thisConfidence_loop:
+                globals()[paramName] = thisConfidence_loop[paramName]
+        if thisSession is not None:
+            # if running in a Session with a Liaison client, send data up to now
+            thisSession.sendExperimentData()
         
-        # --- Run Routine "confidence_evaluation_instruction" ---
-        thisExp.currentRoutine = confidence_evaluation_instruction
-        confidence_evaluation_instruction.forceEnded = routineForceEnded = not continueRoutine
-        while continueRoutine:
-            # if trial has changed, end Routine now
-            if hasattr(thisTrial, 'status') and thisTrial.status == STOPPING:
+        for thisConfidence_loop in confidence_loop:
+            confidence_loop.status = STARTED
+            if hasattr(thisConfidence_loop, 'status'):
+                thisConfidence_loop.status = STARTED
+            currentLoop = confidence_loop
+            thisExp.timestampOnFlip(win, 'thisRow.t', format=globalClock.format)
+            if thisSession is not None:
+                # if running in a Session with a Liaison client, send data up to now
+                thisSession.sendExperimentData()
+            # abbreviate parameter names if possible (e.g. rgb = thisConfidence_loop.rgb)
+            if thisConfidence_loop != None:
+                for paramName in thisConfidence_loop:
+                    globals()[paramName] = thisConfidence_loop[paramName]
+            
+            # --- Prepare to start Routine "confidence_evaluation" ---
+            # create an object to store info about Routine confidence_evaluation
+            confidence_evaluation = data.Routine(
+                name='confidence_evaluation',
+                components=[confidenceText, confidenceIdeaText, confidenceTextHint, confidenceSlider, buttonText, confidenceProceedButton],
+            )
+            confidence_evaluation.status = NOT_STARTED
+            continueRoutine = True
+            # update component parameters for each repeat
+            confidenceIdeaText.reset()
+            # Run 'Begin Routine' code from skipConfidenceRoutine
+            if len(rememberedIdeas) == 0:
                 continueRoutine = False
-            # get current time
-            t = routineTimer.getTime()
-            tThisFlip = win.getFutureFlipTime(clock=routineTimer)
-            tThisFlipGlobal = win.getFutureFlipTime(clock=None)
-            frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
-            # update/draw components on each frame
-            
-            # *ceInstructionText* updates
-            
-            # if ceInstructionText is starting this frame...
-            if ceInstructionText.status == NOT_STARTED and t >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                ceInstructionText.frameNStart = frameN  # exact frame index
-                ceInstructionText.tStart = t  # local t and not account for scr refresh
-                ceInstructionText.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(ceInstructionText, 'tStartRefresh')  # time at next scr refresh
-                # update status
-                ceInstructionText.status = STARTED
-                ceInstructionText.setAutoDraw(True)
-            
-            # if ceInstructionText is active this frame...
-            if ceInstructionText.status == STARTED:
-                # update params
-                pass
-            
-            # *ceInstructionHint* updates
-            
-            # if ceInstructionHint is starting this frame...
-            if ceInstructionHint.status == NOT_STARTED and t >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                ceInstructionHint.frameNStart = frameN  # exact frame index
-                ceInstructionHint.tStart = t  # local t and not account for scr refresh
-                ceInstructionHint.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(ceInstructionHint, 'tStartRefresh')  # time at next scr refresh
-                # update status
-                ceInstructionHint.status = STARTED
-                ceInstructionHint.setAutoDraw(True)
-            
-            # if ceInstructionHint is active this frame...
-            if ceInstructionHint.status == STARTED:
-                # update params
-                pass
-            
-            # *ceInstructionButtonText* updates
-            
-            # if ceInstructionButtonText is starting this frame...
-            if ceInstructionButtonText.status == NOT_STARTED and t >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                ceInstructionButtonText.frameNStart = frameN  # exact frame index
-                ceInstructionButtonText.tStart = t  # local t and not account for scr refresh
-                ceInstructionButtonText.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(ceInstructionButtonText, 'tStartRefresh')  # time at next scr refresh
-                # update status
-                ceInstructionButtonText.status = STARTED
-                ceInstructionButtonText.setAutoDraw(True)
-            
-            # if ceInstructionButtonText is active this frame...
-            if ceInstructionButtonText.status == STARTED:
-                # update params
-                pass
-            
-            # *ceInstructionProceedButton* updates
-            waitOnFlip = False
-            
-            # if ceInstructionProceedButton is starting this frame...
-            if ceInstructionProceedButton.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                ceInstructionProceedButton.frameNStart = frameN  # exact frame index
-                ceInstructionProceedButton.tStart = t  # local t and not account for scr refresh
-                ceInstructionProceedButton.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(ceInstructionProceedButton, 'tStartRefresh')  # time at next scr refresh
-                # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'ceInstructionProceedButton.started')
-                # update status
-                ceInstructionProceedButton.status = STARTED
-                # keyboard checking is just starting
-                waitOnFlip = True
-                win.callOnFlip(ceInstructionProceedButton.clock.reset)  # t=0 on next screen flip
-                win.callOnFlip(ceInstructionProceedButton.clearEvents, eventType='keyboard')  # clear events on next screen flip
-            if ceInstructionProceedButton.status == STARTED and not waitOnFlip:
-                theseKeys = ceInstructionProceedButton.getKeys(keyList=['space'], ignoreKeys=["escape"], waitRelease=False)
-                _ceInstructionProceedButton_allKeys.extend(theseKeys)
-                if len(_ceInstructionProceedButton_allKeys):
-                    ceInstructionProceedButton.keys = _ceInstructionProceedButton_allKeys[-1].name  # just the last key pressed
-                    ceInstructionProceedButton.rt = _ceInstructionProceedButton_allKeys[-1].rt
-                    ceInstructionProceedButton.duration = _ceInstructionProceedButton_allKeys[-1].duration
-                    # a response ends the routine
-                    continueRoutine = False
-            
-            # check for quit (typically the Esc key)
-            if defaultKeyboard.getKeys(keyList=["escape"]):
-                thisExp.status = FINISHED
-            if thisExp.status == FINISHED or endExpNow:
-                endExperiment(thisExp, win=win)
-                return
-            # pause experiment here if requested
-            if thisExp.status == PAUSED:
-                pauseExperiment(
-                    thisExp=thisExp, 
-                    win=win, 
-                    timers=[routineTimer, globalClock], 
-                    currentRoutine=confidence_evaluation_instruction,
-                )
-                # skip the frame we paused on
-                continue
-            
-            # has a Component requested the Routine to end?
-            if not continueRoutine:
-                confidence_evaluation_instruction.forceEnded = routineForceEnded = True
-            # has the Routine been forcibly ended?
-            if confidence_evaluation_instruction.forceEnded or routineForceEnded:
-                break
-            # has every Component finished?
-            continueRoutine = False
-            for thisComponent in confidence_evaluation_instruction.components:
-                if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
-                    continueRoutine = True
-                    break  # at least one component has not yet finished
-            
-            # refresh the screen
-            if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
-                win.flip()
-        
-        # --- Ending Routine "confidence_evaluation_instruction" ---
-        for thisComponent in confidence_evaluation_instruction.components:
-            if hasattr(thisComponent, "setAutoDraw"):
-                thisComponent.setAutoDraw(False)
-        # store stop times for confidence_evaluation_instruction
-        confidence_evaluation_instruction.tStop = globalClock.getTime(format='float')
-        confidence_evaluation_instruction.tStopRefresh = tThisFlipGlobal
-        # check responses
-        if ceInstructionProceedButton.keys in ['', [], None]:  # No response was made
-            ceInstructionProceedButton.keys = None
-        trials.addData('ceInstructionProceedButton.keys',ceInstructionProceedButton.keys)
-        if ceInstructionProceedButton.keys != None:  # we had a response
-            trials.addData('ceInstructionProceedButton.rt', ceInstructionProceedButton.rt)
-            trials.addData('ceInstructionProceedButton.duration', ceInstructionProceedButton.duration)
-        # the Routine "confidence_evaluation_instruction" was not non-slip safe, so reset the non-slip timer
-        routineTimer.reset()
-        
-        # --- Prepare to start Routine "confidence_evaluation" ---
-        # create an object to store info about Routine confidence_evaluation
-        confidence_evaluation = data.Routine(
-            name='confidence_evaluation',
-            components=[confidenceText, confidenceTextHint, confidenceSlider, buttonText, confidenceProceedButton],
-        )
-        confidence_evaluation.status = NOT_STARTED
-        continueRoutine = True
-        # update component parameters for each repeat
-        # Run 'Begin Routine' code from skipConfidenceRoutine
-        if skipConfidence:
-            continueRoutine = False
-        confidenceSlider.reset()
-        # create starting attributes for confidenceProceedButton
-        confidenceProceedButton.keys = []
-        confidenceProceedButton.rt = []
-        _confidenceProceedButton_allKeys = []
-        # store start times for confidence_evaluation
-        confidence_evaluation.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
-        confidence_evaluation.tStart = globalClock.getTime(format='float')
-        confidence_evaluation.status = STARTED
-        confidence_evaluation.maxDuration = None
-        # keep track of which components have finished
-        confidence_evaluationComponents = confidence_evaluation.components
-        for thisComponent in confidence_evaluation.components:
-            thisComponent.tStart = None
-            thisComponent.tStop = None
-            thisComponent.tStartRefresh = None
-            thisComponent.tStopRefresh = None
-            if hasattr(thisComponent, 'status'):
-                thisComponent.status = NOT_STARTED
-        # reset timers
-        t = 0
-        _timeToFirstFrame = win.getFutureFlipTime(clock="now")
-        frameN = -1
-        
-        # --- Run Routine "confidence_evaluation" ---
-        thisExp.currentRoutine = confidence_evaluation
-        confidence_evaluation.forceEnded = routineForceEnded = not continueRoutine
-        while continueRoutine:
-            # if trial has changed, end Routine now
-            if hasattr(thisTrial, 'status') and thisTrial.status == STOPPING:
-                continueRoutine = False
-            # get current time
-            t = routineTimer.getTime()
-            tThisFlip = win.getFutureFlipTime(clock=routineTimer)
-            tThisFlipGlobal = win.getFutureFlipTime(clock=None)
-            frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
-            # update/draw components on each frame
-            
-            # *confidenceText* updates
-            
-            # if confidenceText is starting this frame...
-            if confidenceText.status == NOT_STARTED and t >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                confidenceText.frameNStart = frameN  # exact frame index
-                confidenceText.tStart = t  # local t and not account for scr refresh
-                confidenceText.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(confidenceText, 'tStartRefresh')  # time at next scr refresh
-                # update status
-                confidenceText.status = STARTED
-                confidenceText.setAutoDraw(True)
-            
-            # if confidenceText is active this frame...
-            if confidenceText.status == STARTED:
-                # update params
-                pass
-            
-            # *confidenceTextHint* updates
-            
-            # if confidenceTextHint is starting this frame...
-            if confidenceTextHint.status == NOT_STARTED and t >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                confidenceTextHint.frameNStart = frameN  # exact frame index
-                confidenceTextHint.tStart = t  # local t and not account for scr refresh
-                confidenceTextHint.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(confidenceTextHint, 'tStartRefresh')  # time at next scr refresh
-                # update status
-                confidenceTextHint.status = STARTED
-                confidenceTextHint.setAutoDraw(True)
-            
-            # if confidenceTextHint is active this frame...
-            if confidenceTextHint.status == STARTED:
-                # update params
-                pass
-            
-            # *confidenceSlider* updates
-            
-            # if confidenceSlider is starting this frame...
-            if confidenceSlider.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                confidenceSlider.frameNStart = frameN  # exact frame index
-                confidenceSlider.tStart = t  # local t and not account for scr refresh
-                confidenceSlider.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(confidenceSlider, 'tStartRefresh')  # time at next scr refresh
-                # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'confidenceSlider.started')
-                # update status
-                confidenceSlider.status = STARTED
-                confidenceSlider.setAutoDraw(True)
-            
-            # if confidenceSlider is active this frame...
-            if confidenceSlider.status == STARTED:
-                # update params
-                pass
-            
-            # *buttonText* updates
-            
-            # if buttonText is starting this frame...
-            if buttonText.status == NOT_STARTED and t >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                buttonText.frameNStart = frameN  # exact frame index
-                buttonText.tStart = t  # local t and not account for scr refresh
-                buttonText.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(buttonText, 'tStartRefresh')  # time at next scr refresh
-                # update status
-                buttonText.status = STARTED
-                buttonText.setAutoDraw(True)
-            
-            # if buttonText is active this frame...
-            if buttonText.status == STARTED:
-                # update params
-                pass
-            
-            # *confidenceProceedButton* updates
-            
-            # if confidenceProceedButton is starting this frame...
-            if confidenceProceedButton.status == NOT_STARTED and t >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                confidenceProceedButton.frameNStart = frameN  # exact frame index
-                confidenceProceedButton.tStart = t  # local t and not account for scr refresh
-                confidenceProceedButton.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(confidenceProceedButton, 'tStartRefresh')  # time at next scr refresh
-                # update status
-                confidenceProceedButton.status = STARTED
-                # keyboard checking is just starting
-                confidenceProceedButton.clock.reset()  # now t=0
-            if confidenceProceedButton.status == STARTED:
-                theseKeys = confidenceProceedButton.getKeys(keyList=['return'], ignoreKeys=["escape"], waitRelease=False)
-                _confidenceProceedButton_allKeys.extend(theseKeys)
-                if len(_confidenceProceedButton_allKeys):
-                    confidenceProceedButton.keys = _confidenceProceedButton_allKeys[-1].name  # just the last key pressed
-                    confidenceProceedButton.rt = _confidenceProceedButton_allKeys[-1].rt
-                    confidenceProceedButton.duration = _confidenceProceedButton_allKeys[-1].duration
-                    # a response ends the routine
-                    continueRoutine = False
-            
-            # check for quit (typically the Esc key)
-            if defaultKeyboard.getKeys(keyList=["escape"]):
-                thisExp.status = FINISHED
-            if thisExp.status == FINISHED or endExpNow:
-                endExperiment(thisExp, win=win)
-                return
-            # pause experiment here if requested
-            if thisExp.status == PAUSED:
-                pauseExperiment(
-                    thisExp=thisExp, 
-                    win=win, 
-                    timers=[routineTimer, globalClock], 
-                    currentRoutine=confidence_evaluation,
-                )
-                # skip the frame we paused on
-                continue
-            
-            # has a Component requested the Routine to end?
-            if not continueRoutine:
-                confidence_evaluation.forceEnded = routineForceEnded = True
-            # has the Routine been forcibly ended?
-            if confidence_evaluation.forceEnded or routineForceEnded:
-                break
-            # has every Component finished?
-            continueRoutine = False
+            else:
+                currentСonfIdea = rememberedIdeas[confidence_loop.thisN]
+                confidenceIdeaText.text = (f'«{currentСonfIdea}»')
+                confidenceSlider.reset()
+            confidenceSlider.reset()
+            # create starting attributes for confidenceProceedButton
+            confidenceProceedButton.keys = []
+            confidenceProceedButton.rt = []
+            _confidenceProceedButton_allKeys = []
+            # store start times for confidence_evaluation
+            confidence_evaluation.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
+            confidence_evaluation.tStart = globalClock.getTime(format='float')
+            confidence_evaluation.status = STARTED
+            confidence_evaluation.maxDuration = None
+            # keep track of which components have finished
+            confidence_evaluationComponents = confidence_evaluation.components
             for thisComponent in confidence_evaluation.components:
-                if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
-                    continueRoutine = True
-                    break  # at least one component has not yet finished
+                thisComponent.tStart = None
+                thisComponent.tStop = None
+                thisComponent.tStartRefresh = None
+                thisComponent.tStopRefresh = None
+                if hasattr(thisComponent, 'status'):
+                    thisComponent.status = NOT_STARTED
+            # reset timers
+            t = 0
+            _timeToFirstFrame = win.getFutureFlipTime(clock="now")
+            frameN = -1
             
-            # refresh the screen
-            if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
-                win.flip()
-        
-        # --- Ending Routine "confidence_evaluation" ---
-        for thisComponent in confidence_evaluation.components:
-            if hasattr(thisComponent, "setAutoDraw"):
-                thisComponent.setAutoDraw(False)
-        # store stop times for confidence_evaluation
-        confidence_evaluation.tStop = globalClock.getTime(format='float')
-        confidence_evaluation.tStopRefresh = tThisFlipGlobal
-        trials.addData('confidenceSlider.response', confidenceSlider.getRating())
-        trials.addData('confidenceSlider.rt', confidenceSlider.getRT())
-        # Run 'End Routine' code from skipSourceRoutine
-        confidenceValue = confidenceSlider.getRating()
-        
-        if confidenceValue is None:
-            confidenceValue = -1
-        
-        thisExp.addData('confidence', confidenceValue)
-        
-        if confidenceValue != -1 and confidenceValue < 50:
-            skipSource = False
-        else:
-            skipSource = True
-        # the Routine "confidence_evaluation" was not non-slip safe, so reset the non-slip timer
-        routineTimer.reset()
-        
-        # --- Prepare to start Routine "source_evaluation" ---
-        # create an object to store info about Routine source_evaluation
-        source_evaluation = data.Routine(
-            name='source_evaluation',
-            components=[sourceEvaluationText, sourceEvaluationTextBox, sourceButtonText, sourceEvaluationButton],
-        )
-        source_evaluation.status = NOT_STARTED
-        continueRoutine = True
-        # update component parameters for each repeat
-        # Run 'Begin Routine' code from skipSourceEvaluation
-        if skipSource:
-            continueRoutine = False
-        sourceEvaluationTextBox.reset()
-        # create starting attributes for sourceEvaluationButton
-        sourceEvaluationButton.keys = []
-        sourceEvaluationButton.rt = []
-        _sourceEvaluationButton_allKeys = []
-        # store start times for source_evaluation
-        source_evaluation.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
-        source_evaluation.tStart = globalClock.getTime(format='float')
-        source_evaluation.status = STARTED
-        source_evaluation.maxDuration = None
-        # keep track of which components have finished
-        source_evaluationComponents = source_evaluation.components
-        for thisComponent in source_evaluation.components:
-            thisComponent.tStart = None
-            thisComponent.tStop = None
-            thisComponent.tStartRefresh = None
-            thisComponent.tStopRefresh = None
-            if hasattr(thisComponent, 'status'):
-                thisComponent.status = NOT_STARTED
-        # reset timers
-        t = 0
-        _timeToFirstFrame = win.getFutureFlipTime(clock="now")
-        frameN = -1
-        
-        # --- Run Routine "source_evaluation" ---
-        thisExp.currentRoutine = source_evaluation
-        source_evaluation.forceEnded = routineForceEnded = not continueRoutine
-        while continueRoutine:
-            # if trial has changed, end Routine now
-            if hasattr(thisTrial, 'status') and thisTrial.status == STOPPING:
-                continueRoutine = False
-            # get current time
-            t = routineTimer.getTime()
-            tThisFlip = win.getFutureFlipTime(clock=routineTimer)
-            tThisFlipGlobal = win.getFutureFlipTime(clock=None)
-            frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
-            # update/draw components on each frame
-            
-            # *sourceEvaluationText* updates
-            
-            # if sourceEvaluationText is starting this frame...
-            if sourceEvaluationText.status == NOT_STARTED and t >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                sourceEvaluationText.frameNStart = frameN  # exact frame index
-                sourceEvaluationText.tStart = t  # local t and not account for scr refresh
-                sourceEvaluationText.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(sourceEvaluationText, 'tStartRefresh')  # time at next scr refresh
-                # update status
-                sourceEvaluationText.status = STARTED
-                sourceEvaluationText.setAutoDraw(True)
-            
-            # if sourceEvaluationText is active this frame...
-            if sourceEvaluationText.status == STARTED:
-                # update params
-                pass
-            
-            # *sourceEvaluationTextBox* updates
-            
-            # if sourceEvaluationTextBox is starting this frame...
-            if sourceEvaluationTextBox.status == NOT_STARTED and t >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                sourceEvaluationTextBox.frameNStart = frameN  # exact frame index
-                sourceEvaluationTextBox.tStart = t  # local t and not account for scr refresh
-                sourceEvaluationTextBox.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(sourceEvaluationTextBox, 'tStartRefresh')  # time at next scr refresh
-                # update status
-                sourceEvaluationTextBox.status = STARTED
-                sourceEvaluationTextBox.setAutoDraw(True)
-            
-            # if sourceEvaluationTextBox is active this frame...
-            if sourceEvaluationTextBox.status == STARTED:
-                # update params
-                pass
-            
-            # *sourceButtonText* updates
-            
-            # if sourceButtonText is starting this frame...
-            if sourceButtonText.status == NOT_STARTED and t >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                sourceButtonText.frameNStart = frameN  # exact frame index
-                sourceButtonText.tStart = t  # local t and not account for scr refresh
-                sourceButtonText.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(sourceButtonText, 'tStartRefresh')  # time at next scr refresh
-                # update status
-                sourceButtonText.status = STARTED
-                sourceButtonText.setAutoDraw(True)
-            
-            # if sourceButtonText is active this frame...
-            if sourceButtonText.status == STARTED:
-                # update params
-                pass
-            
-            # *sourceEvaluationButton* updates
-            waitOnFlip = False
-            
-            # if sourceEvaluationButton is starting this frame...
-            if sourceEvaluationButton.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
-                # keep track of start time/frame for later
-                sourceEvaluationButton.frameNStart = frameN  # exact frame index
-                sourceEvaluationButton.tStart = t  # local t and not account for scr refresh
-                sourceEvaluationButton.tStartRefresh = tThisFlipGlobal  # on global time
-                win.timeOnFlip(sourceEvaluationButton, 'tStartRefresh')  # time at next scr refresh
-                # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'sourceEvaluationButton.started')
-                # update status
-                sourceEvaluationButton.status = STARTED
-                # keyboard checking is just starting
-                waitOnFlip = True
-                win.callOnFlip(sourceEvaluationButton.clock.reset)  # t=0 on next screen flip
-                win.callOnFlip(sourceEvaluationButton.clearEvents, eventType='keyboard')  # clear events on next screen flip
-            if sourceEvaluationButton.status == STARTED and not waitOnFlip:
-                theseKeys = sourceEvaluationButton.getKeys(keyList=['return'], ignoreKeys=["escape"], waitRelease=False)
-                _sourceEvaluationButton_allKeys.extend(theseKeys)
-                if len(_sourceEvaluationButton_allKeys):
-                    sourceEvaluationButton.keys = _sourceEvaluationButton_allKeys[-1].name  # just the last key pressed
-                    sourceEvaluationButton.rt = _sourceEvaluationButton_allKeys[-1].rt
-                    sourceEvaluationButton.duration = _sourceEvaluationButton_allKeys[-1].duration
-                    # a response ends the routine
+            # --- Run Routine "confidence_evaluation" ---
+            thisExp.currentRoutine = confidence_evaluation
+            confidence_evaluation.forceEnded = routineForceEnded = not continueRoutine
+            while continueRoutine:
+                # if trial has changed, end Routine now
+                if hasattr(thisConfidence_loop, 'status') and thisConfidence_loop.status == STOPPING:
                     continueRoutine = False
+                # get current time
+                t = routineTimer.getTime()
+                tThisFlip = win.getFutureFlipTime(clock=routineTimer)
+                tThisFlipGlobal = win.getFutureFlipTime(clock=None)
+                frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
+                # update/draw components on each frame
+                
+                # *confidenceText* updates
+                
+                # if confidenceText is starting this frame...
+                if confidenceText.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                    # keep track of start time/frame for later
+                    confidenceText.frameNStart = frameN  # exact frame index
+                    confidenceText.tStart = t  # local t and not account for scr refresh
+                    confidenceText.tStartRefresh = tThisFlipGlobal  # on global time
+                    win.timeOnFlip(confidenceText, 'tStartRefresh')  # time at next scr refresh
+                    # update status
+                    confidenceText.status = STARTED
+                    confidenceText.setAutoDraw(True)
+                
+                # if confidenceText is active this frame...
+                if confidenceText.status == STARTED:
+                    # update params
+                    pass
+                
+                # *confidenceIdeaText* updates
+                
+                # if confidenceIdeaText is starting this frame...
+                if confidenceIdeaText.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                    # keep track of start time/frame for later
+                    confidenceIdeaText.frameNStart = frameN  # exact frame index
+                    confidenceIdeaText.tStart = t  # local t and not account for scr refresh
+                    confidenceIdeaText.tStartRefresh = tThisFlipGlobal  # on global time
+                    win.timeOnFlip(confidenceIdeaText, 'tStartRefresh')  # time at next scr refresh
+                    # update status
+                    confidenceIdeaText.status = STARTED
+                    confidenceIdeaText.setAutoDraw(True)
+                
+                # if confidenceIdeaText is active this frame...
+                if confidenceIdeaText.status == STARTED:
+                    # update params
+                    pass
+                
+                # *confidenceTextHint* updates
+                
+                # if confidenceTextHint is starting this frame...
+                if confidenceTextHint.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                    # keep track of start time/frame for later
+                    confidenceTextHint.frameNStart = frameN  # exact frame index
+                    confidenceTextHint.tStart = t  # local t and not account for scr refresh
+                    confidenceTextHint.tStartRefresh = tThisFlipGlobal  # on global time
+                    win.timeOnFlip(confidenceTextHint, 'tStartRefresh')  # time at next scr refresh
+                    # update status
+                    confidenceTextHint.status = STARTED
+                    confidenceTextHint.setAutoDraw(True)
+                
+                # if confidenceTextHint is active this frame...
+                if confidenceTextHint.status == STARTED:
+                    # update params
+                    pass
+                
+                # *confidenceSlider* updates
+                
+                # if confidenceSlider is starting this frame...
+                if confidenceSlider.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                    # keep track of start time/frame for later
+                    confidenceSlider.frameNStart = frameN  # exact frame index
+                    confidenceSlider.tStart = t  # local t and not account for scr refresh
+                    confidenceSlider.tStartRefresh = tThisFlipGlobal  # on global time
+                    win.timeOnFlip(confidenceSlider, 'tStartRefresh')  # time at next scr refresh
+                    # update status
+                    confidenceSlider.status = STARTED
+                    confidenceSlider.setAutoDraw(True)
+                
+                # if confidenceSlider is active this frame...
+                if confidenceSlider.status == STARTED:
+                    # update params
+                    pass
+                
+                # *buttonText* updates
+                
+                # if buttonText is starting this frame...
+                if buttonText.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                    # keep track of start time/frame for later
+                    buttonText.frameNStart = frameN  # exact frame index
+                    buttonText.tStart = t  # local t and not account for scr refresh
+                    buttonText.tStartRefresh = tThisFlipGlobal  # on global time
+                    win.timeOnFlip(buttonText, 'tStartRefresh')  # time at next scr refresh
+                    # update status
+                    buttonText.status = STARTED
+                    buttonText.setAutoDraw(True)
+                
+                # if buttonText is active this frame...
+                if buttonText.status == STARTED:
+                    # update params
+                    pass
+                
+                # *confidenceProceedButton* updates
+                
+                # if confidenceProceedButton is starting this frame...
+                if confidenceProceedButton.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                    # keep track of start time/frame for later
+                    confidenceProceedButton.frameNStart = frameN  # exact frame index
+                    confidenceProceedButton.tStart = t  # local t and not account for scr refresh
+                    confidenceProceedButton.tStartRefresh = tThisFlipGlobal  # on global time
+                    win.timeOnFlip(confidenceProceedButton, 'tStartRefresh')  # time at next scr refresh
+                    # update status
+                    confidenceProceedButton.status = STARTED
+                    # keyboard checking is just starting
+                    confidenceProceedButton.clock.reset()  # now t=0
+                if confidenceProceedButton.status == STARTED:
+                    theseKeys = confidenceProceedButton.getKeys(keyList=['return'], ignoreKeys=["escape"], waitRelease=False)
+                    _confidenceProceedButton_allKeys.extend(theseKeys)
+                    if len(_confidenceProceedButton_allKeys):
+                        confidenceProceedButton.keys = _confidenceProceedButton_allKeys[-1].name  # just the last key pressed
+                        confidenceProceedButton.rt = _confidenceProceedButton_allKeys[-1].rt
+                        confidenceProceedButton.duration = _confidenceProceedButton_allKeys[-1].duration
+                        # a response ends the routine
+                        continueRoutine = False
+                
+                # check for quit (typically the Esc key)
+                if defaultKeyboard.getKeys(keyList=["escape"]):
+                    thisExp.status = FINISHED
+                if thisExp.status == FINISHED or endExpNow:
+                    endExperiment(thisExp, win=win)
+                    return
+                # pause experiment here if requested
+                if thisExp.status == PAUSED:
+                    pauseExperiment(
+                        thisExp=thisExp, 
+                        win=win, 
+                        timers=[routineTimer, globalClock], 
+                        currentRoutine=confidence_evaluation,
+                    )
+                    # skip the frame we paused on
+                    continue
+                
+                # has a Component requested the Routine to end?
+                if not continueRoutine:
+                    confidence_evaluation.forceEnded = routineForceEnded = True
+                # has the Routine been forcibly ended?
+                if confidence_evaluation.forceEnded or routineForceEnded:
+                    break
+                # has every Component finished?
+                continueRoutine = False
+                for thisComponent in confidence_evaluation.components:
+                    if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+                        continueRoutine = True
+                        break  # at least one component has not yet finished
+                
+                # refresh the screen
+                if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
+                    win.flip()
             
-            # check for quit (typically the Esc key)
-            if defaultKeyboard.getKeys(keyList=["escape"]):
-                thisExp.status = FINISHED
-            if thisExp.status == FINISHED or endExpNow:
-                endExperiment(thisExp, win=win)
-                return
-            # pause experiment here if requested
-            if thisExp.status == PAUSED:
+            # --- Ending Routine "confidence_evaluation" ---
+            for thisComponent in confidence_evaluation.components:
+                if hasattr(thisComponent, "setAutoDraw"):
+                    thisComponent.setAutoDraw(False)
+            # store stop times for confidence_evaluation
+            confidence_evaluation.tStop = globalClock.getTime(format='float')
+            confidence_evaluation.tStopRefresh = tThisFlipGlobal
+            # Run 'End Routine' code from skipConfidenceRoutine
+            score = confidenceSlider.getRating()
+            if score is None:
+                score = -1
+            
+            confidenceScores[currentСonfIdea] = score
+            
+            thisExp.addData('conf_idea', currentСonfIdea)
+            thisExp.addData('conf_score', score)
+            confidence_loop.addData('confidenceSlider.response', confidenceSlider.getRating())
+            # the Routine "confidence_evaluation" was not non-slip safe, so reset the non-slip timer
+            routineTimer.reset()
+            # mark thisConfidence_loop as finished
+            if hasattr(thisConfidence_loop, 'status'):
+                thisConfidence_loop.status = FINISHED
+            # if awaiting a pause, pause now
+            if confidence_loop.status == PAUSED:
+                thisExp.status = PAUSED
                 pauseExperiment(
                     thisExp=thisExp, 
                     win=win, 
-                    timers=[routineTimer, globalClock], 
-                    currentRoutine=source_evaluation,
+                    timers=[globalClock], 
                 )
-                # skip the frame we paused on
-                continue
+                # once done pausing, restore running status
+                confidence_loop.status = STARTED
+            thisExp.nextEntry()
             
-            # has a Component requested the Routine to end?
-            if not continueRoutine:
-                source_evaluation.forceEnded = routineForceEnded = True
-            # has the Routine been forcibly ended?
-            if source_evaluation.forceEnded or routineForceEnded:
-                break
-            # has every Component finished?
-            continueRoutine = False
-            for thisComponent in source_evaluation.components:
-                if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
-                    continueRoutine = True
-                    break  # at least one component has not yet finished
-            
-            # refresh the screen
-            if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
-                win.flip()
+        # completed len(rememberedIdeas) repeats of 'confidence_loop'
+        confidence_loop.status = FINISHED
         
-        # --- Ending Routine "source_evaluation" ---
-        for thisComponent in source_evaluation.components:
-            if hasattr(thisComponent, "setAutoDraw"):
-                thisComponent.setAutoDraw(False)
-        # store stop times for source_evaluation
-        source_evaluation.tStop = globalClock.getTime(format='float')
-        source_evaluation.tStopRefresh = tThisFlipGlobal
-        trials.addData('sourceEvaluationTextBox.text',sourceEvaluationTextBox.text)
-        # check responses
-        if sourceEvaluationButton.keys in ['', [], None]:  # No response was made
-            sourceEvaluationButton.keys = None
-        trials.addData('sourceEvaluationButton.keys',sourceEvaluationButton.keys)
-        if sourceEvaluationButton.keys != None:  # we had a response
-            trials.addData('sourceEvaluationButton.rt', sourceEvaluationButton.rt)
-            trials.addData('sourceEvaluationButton.duration', sourceEvaluationButton.duration)
-        # Run 'End Routine' code from formatSourceText
-        sourceText = sourceEvaluationTextBox.getText()
+        if thisSession is not None:
+            # if running in a Session with a Liaison client, send data up to now
+            thisSession.sendExperimentData()
+        # get names of stimulus parameters
+        if confidence_loop.trialList in ([], [None], None):
+            params = []
+        else:
+            params = confidence_loop.trialList[0].keys()
+        # save data for this loop
+        confidence_loop.saveAsExcel(filename + '.xlsx', sheetName='confidence_loop',
+            stimOut=params,
+            dataOut=['n','all_mean','all_std', 'all_raw'])
         
-        sourceText = sourceText.strip() if sourceText else ''
-        
-        thisExp.addData('source_description', sourceText)
-        # the Routine "source_evaluation" was not non-slip safe, so reset the non-slip timer
-        routineTimer.reset()
-        
-        # --- Prepare to start Routine "save_routine" ---
-        # create an object to store info about Routine save_routine
-        save_routine = data.Routine(
-            name='save_routine',
+        # --- Prepare to start Routine "prepare_source_routine" ---
+        # create an object to store info about Routine prepare_source_routine
+        prepare_source_routine = data.Routine(
+            name='prepare_source_routine',
             components=[],
         )
-        save_routine.status = NOT_STARTED
+        prepare_source_routine.status = NOT_STARTED
         continueRoutine = True
         # update component parameters for each repeat
-        # Run 'Begin Routine' code from saveTableRows
-        if skipConfidence:
-            thisExp.addData('confidence', '')
-        if skipSource:
-            thisExp.addData('source_description', '')
+        # Run 'Begin Routine' code from prepareSourceRoutine
+        ideasForSource = [
+            idea for idea, score in confidenceScores.items()
+            if score != -1 and score < 50
+        ]
+        
+        sourceRepsN = len(ideasForSource)
         
         continueRoutine = False
-        # store start times for save_routine
-        save_routine.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
-        save_routine.tStart = globalClock.getTime(format='float')
-        save_routine.status = STARTED
-        save_routine.maxDuration = None
+        # store start times for prepare_source_routine
+        prepare_source_routine.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
+        prepare_source_routine.tStart = globalClock.getTime(format='float')
+        prepare_source_routine.status = STARTED
+        prepare_source_routine.maxDuration = None
         # keep track of which components have finished
-        save_routineComponents = save_routine.components
-        for thisComponent in save_routine.components:
+        prepare_source_routineComponents = prepare_source_routine.components
+        for thisComponent in prepare_source_routine.components:
             thisComponent.tStart = None
             thisComponent.tStop = None
             thisComponent.tStartRefresh = None
@@ -1648,9 +1871,9 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         _timeToFirstFrame = win.getFutureFlipTime(clock="now")
         frameN = -1
         
-        # --- Run Routine "save_routine" ---
-        thisExp.currentRoutine = save_routine
-        save_routine.forceEnded = routineForceEnded = not continueRoutine
+        # --- Run Routine "prepare_source_routine" ---
+        thisExp.currentRoutine = prepare_source_routine
+        prepare_source_routine.forceEnded = routineForceEnded = not continueRoutine
         while continueRoutine:
             # if trial has changed, end Routine now
             if hasattr(thisTrial, 'status') and thisTrial.status == STOPPING:
@@ -1674,20 +1897,20 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                     thisExp=thisExp, 
                     win=win, 
                     timers=[routineTimer, globalClock], 
-                    currentRoutine=save_routine,
+                    currentRoutine=prepare_source_routine,
                 )
                 # skip the frame we paused on
                 continue
             
             # has a Component requested the Routine to end?
             if not continueRoutine:
-                save_routine.forceEnded = routineForceEnded = True
+                prepare_source_routine.forceEnded = routineForceEnded = True
             # has the Routine been forcibly ended?
-            if save_routine.forceEnded or routineForceEnded:
+            if prepare_source_routine.forceEnded or routineForceEnded:
                 break
             # has every Component finished?
             continueRoutine = False
-            for thisComponent in save_routine.components:
+            for thisComponent in prepare_source_routine.components:
                 if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
                     continueRoutine = True
                     break  # at least one component has not yet finished
@@ -1696,15 +1919,279 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
                 win.flip()
         
-        # --- Ending Routine "save_routine" ---
-        for thisComponent in save_routine.components:
+        # --- Ending Routine "prepare_source_routine" ---
+        for thisComponent in prepare_source_routine.components:
             if hasattr(thisComponent, "setAutoDraw"):
                 thisComponent.setAutoDraw(False)
-        # store stop times for save_routine
-        save_routine.tStop = globalClock.getTime(format='float')
-        save_routine.tStopRefresh = tThisFlipGlobal
-        # the Routine "save_routine" was not non-slip safe, so reset the non-slip timer
+        # store stop times for prepare_source_routine
+        prepare_source_routine.tStop = globalClock.getTime(format='float')
+        prepare_source_routine.tStopRefresh = tThisFlipGlobal
+        # the Routine "prepare_source_routine" was not non-slip safe, so reset the non-slip timer
         routineTimer.reset()
+        
+        # set up handler to look after randomisation of conditions etc
+        source_loop = data.TrialHandler2(
+            name='source_loop',
+            nReps=sourceRepsN, 
+            method='sequential', 
+            extraInfo=expInfo, 
+            originPath=-1, 
+            trialList=[None], 
+            seed=None, 
+            isTrials=True, 
+        )
+        thisExp.addLoop(source_loop)  # add the loop to the experiment
+        thisSource_loop = source_loop.trialList[0]  # so we can initialise stimuli with some values
+        # abbreviate parameter names if possible (e.g. rgb = thisSource_loop.rgb)
+        if thisSource_loop != None:
+            for paramName in thisSource_loop:
+                globals()[paramName] = thisSource_loop[paramName]
+        if thisSession is not None:
+            # if running in a Session with a Liaison client, send data up to now
+            thisSession.sendExperimentData()
+        
+        for thisSource_loop in source_loop:
+            source_loop.status = STARTED
+            if hasattr(thisSource_loop, 'status'):
+                thisSource_loop.status = STARTED
+            currentLoop = source_loop
+            thisExp.timestampOnFlip(win, 'thisRow.t', format=globalClock.format)
+            if thisSession is not None:
+                # if running in a Session with a Liaison client, send data up to now
+                thisSession.sendExperimentData()
+            # abbreviate parameter names if possible (e.g. rgb = thisSource_loop.rgb)
+            if thisSource_loop != None:
+                for paramName in thisSource_loop:
+                    globals()[paramName] = thisSource_loop[paramName]
+            
+            # --- Prepare to start Routine "source_evaluation" ---
+            # create an object to store info about Routine source_evaluation
+            source_evaluation = data.Routine(
+                name='source_evaluation',
+                components=[sourceIdeaLabel, sourceEvaluationText, sourceEvaluationTextBox, sourceButtonText, sourceEvaluationButton],
+            )
+            source_evaluation.status = NOT_STARTED
+            continueRoutine = True
+            # update component parameters for each repeat
+            sourceIdeaLabel.reset()
+            sourceEvaluationTextBox.reset()
+            # create starting attributes for sourceEvaluationButton
+            sourceEvaluationButton.keys = []
+            sourceEvaluationButton.rt = []
+            _sourceEvaluationButton_allKeys = []
+            # Run 'Begin Routine' code from prepareIdeasForSource
+            currentSourceIdea = ideasForSource[source_loop.thisN]
+            sourceIdeaLabel.text = f'Идея: «{currentSourceIdea}»'
+            # store start times for source_evaluation
+            source_evaluation.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
+            source_evaluation.tStart = globalClock.getTime(format='float')
+            source_evaluation.status = STARTED
+            source_evaluation.maxDuration = None
+            # keep track of which components have finished
+            source_evaluationComponents = source_evaluation.components
+            for thisComponent in source_evaluation.components:
+                thisComponent.tStart = None
+                thisComponent.tStop = None
+                thisComponent.tStartRefresh = None
+                thisComponent.tStopRefresh = None
+                if hasattr(thisComponent, 'status'):
+                    thisComponent.status = NOT_STARTED
+            # reset timers
+            t = 0
+            _timeToFirstFrame = win.getFutureFlipTime(clock="now")
+            frameN = -1
+            
+            # --- Run Routine "source_evaluation" ---
+            thisExp.currentRoutine = source_evaluation
+            source_evaluation.forceEnded = routineForceEnded = not continueRoutine
+            while continueRoutine:
+                # if trial has changed, end Routine now
+                if hasattr(thisSource_loop, 'status') and thisSource_loop.status == STOPPING:
+                    continueRoutine = False
+                # get current time
+                t = routineTimer.getTime()
+                tThisFlip = win.getFutureFlipTime(clock=routineTimer)
+                tThisFlipGlobal = win.getFutureFlipTime(clock=None)
+                frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
+                # update/draw components on each frame
+                
+                # *sourceIdeaLabel* updates
+                
+                # if sourceIdeaLabel is starting this frame...
+                if sourceIdeaLabel.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                    # keep track of start time/frame for later
+                    sourceIdeaLabel.frameNStart = frameN  # exact frame index
+                    sourceIdeaLabel.tStart = t  # local t and not account for scr refresh
+                    sourceIdeaLabel.tStartRefresh = tThisFlipGlobal  # on global time
+                    win.timeOnFlip(sourceIdeaLabel, 'tStartRefresh')  # time at next scr refresh
+                    # update status
+                    sourceIdeaLabel.status = STARTED
+                    sourceIdeaLabel.setAutoDraw(True)
+                
+                # if sourceIdeaLabel is active this frame...
+                if sourceIdeaLabel.status == STARTED:
+                    # update params
+                    pass
+                
+                # *sourceEvaluationText* updates
+                
+                # if sourceEvaluationText is starting this frame...
+                if sourceEvaluationText.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                    # keep track of start time/frame for later
+                    sourceEvaluationText.frameNStart = frameN  # exact frame index
+                    sourceEvaluationText.tStart = t  # local t and not account for scr refresh
+                    sourceEvaluationText.tStartRefresh = tThisFlipGlobal  # on global time
+                    win.timeOnFlip(sourceEvaluationText, 'tStartRefresh')  # time at next scr refresh
+                    # update status
+                    sourceEvaluationText.status = STARTED
+                    sourceEvaluationText.setAutoDraw(True)
+                
+                # if sourceEvaluationText is active this frame...
+                if sourceEvaluationText.status == STARTED:
+                    # update params
+                    pass
+                
+                # *sourceEvaluationTextBox* updates
+                
+                # if sourceEvaluationTextBox is starting this frame...
+                if sourceEvaluationTextBox.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                    # keep track of start time/frame for later
+                    sourceEvaluationTextBox.frameNStart = frameN  # exact frame index
+                    sourceEvaluationTextBox.tStart = t  # local t and not account for scr refresh
+                    sourceEvaluationTextBox.tStartRefresh = tThisFlipGlobal  # on global time
+                    win.timeOnFlip(sourceEvaluationTextBox, 'tStartRefresh')  # time at next scr refresh
+                    # update status
+                    sourceEvaluationTextBox.status = STARTED
+                    sourceEvaluationTextBox.setAutoDraw(True)
+                
+                # if sourceEvaluationTextBox is active this frame...
+                if sourceEvaluationTextBox.status == STARTED:
+                    # update params
+                    pass
+                
+                # *sourceButtonText* updates
+                
+                # if sourceButtonText is starting this frame...
+                if sourceButtonText.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                    # keep track of start time/frame for later
+                    sourceButtonText.frameNStart = frameN  # exact frame index
+                    sourceButtonText.tStart = t  # local t and not account for scr refresh
+                    sourceButtonText.tStartRefresh = tThisFlipGlobal  # on global time
+                    win.timeOnFlip(sourceButtonText, 'tStartRefresh')  # time at next scr refresh
+                    # update status
+                    sourceButtonText.status = STARTED
+                    sourceButtonText.setAutoDraw(True)
+                
+                # if sourceButtonText is active this frame...
+                if sourceButtonText.status == STARTED:
+                    # update params
+                    pass
+                
+                # *sourceEvaluationButton* updates
+                
+                # if sourceEvaluationButton is starting this frame...
+                if sourceEvaluationButton.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                    # keep track of start time/frame for later
+                    sourceEvaluationButton.frameNStart = frameN  # exact frame index
+                    sourceEvaluationButton.tStart = t  # local t and not account for scr refresh
+                    sourceEvaluationButton.tStartRefresh = tThisFlipGlobal  # on global time
+                    win.timeOnFlip(sourceEvaluationButton, 'tStartRefresh')  # time at next scr refresh
+                    # update status
+                    sourceEvaluationButton.status = STARTED
+                    # keyboard checking is just starting
+                    sourceEvaluationButton.clock.reset()  # now t=0
+                if sourceEvaluationButton.status == STARTED:
+                    theseKeys = sourceEvaluationButton.getKeys(keyList=['return'], ignoreKeys=["escape"], waitRelease=False)
+                    _sourceEvaluationButton_allKeys.extend(theseKeys)
+                    if len(_sourceEvaluationButton_allKeys):
+                        sourceEvaluationButton.keys = _sourceEvaluationButton_allKeys[-1].name  # just the last key pressed
+                        sourceEvaluationButton.rt = _sourceEvaluationButton_allKeys[-1].rt
+                        sourceEvaluationButton.duration = _sourceEvaluationButton_allKeys[-1].duration
+                        # a response ends the routine
+                        continueRoutine = False
+                
+                # check for quit (typically the Esc key)
+                if defaultKeyboard.getKeys(keyList=["escape"]):
+                    thisExp.status = FINISHED
+                if thisExp.status == FINISHED or endExpNow:
+                    endExperiment(thisExp, win=win)
+                    return
+                # pause experiment here if requested
+                if thisExp.status == PAUSED:
+                    pauseExperiment(
+                        thisExp=thisExp, 
+                        win=win, 
+                        timers=[routineTimer, globalClock], 
+                        currentRoutine=source_evaluation,
+                    )
+                    # skip the frame we paused on
+                    continue
+                
+                # has a Component requested the Routine to end?
+                if not continueRoutine:
+                    source_evaluation.forceEnded = routineForceEnded = True
+                # has the Routine been forcibly ended?
+                if source_evaluation.forceEnded or routineForceEnded:
+                    break
+                # has every Component finished?
+                continueRoutine = False
+                for thisComponent in source_evaluation.components:
+                    if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+                        continueRoutine = True
+                        break  # at least one component has not yet finished
+                
+                # refresh the screen
+                if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
+                    win.flip()
+            
+            # --- Ending Routine "source_evaluation" ---
+            for thisComponent in source_evaluation.components:
+                if hasattr(thisComponent, "setAutoDraw"):
+                    thisComponent.setAutoDraw(False)
+            # store stop times for source_evaluation
+            source_evaluation.tStop = globalClock.getTime(format='float')
+            source_evaluation.tStopRefresh = tThisFlipGlobal
+            source_loop.addData('sourceEvaluationTextBox.text',sourceEvaluationTextBox.text)
+            # Run 'End Routine' code from formatSourceText
+            sourceText = sourceEvaluationTextBox.getText()
+            sourceText = sourceText.strip() if sourceText else ''
+            
+            sourceTexts[currentSourceIdea] = sourceText
+            
+            thisExp.addData('source_idea', currentSourceIdea)
+            thisExp.addData('source_text', sourceText)
+            # the Routine "source_evaluation" was not non-slip safe, so reset the non-slip timer
+            routineTimer.reset()
+            # mark thisSource_loop as finished
+            if hasattr(thisSource_loop, 'status'):
+                thisSource_loop.status = FINISHED
+            # if awaiting a pause, pause now
+            if source_loop.status == PAUSED:
+                thisExp.status = PAUSED
+                pauseExperiment(
+                    thisExp=thisExp, 
+                    win=win, 
+                    timers=[globalClock], 
+                )
+                # once done pausing, restore running status
+                source_loop.status = STARTED
+            thisExp.nextEntry()
+            
+        # completed sourceRepsN repeats of 'source_loop'
+        source_loop.status = FINISHED
+        
+        if thisSession is not None:
+            # if running in a Session with a Liaison client, send data up to now
+            thisSession.sendExperimentData()
+        # get names of stimulus parameters
+        if source_loop.trialList in ([], [None], None):
+            params = []
+        else:
+            params = source_loop.trialList[0].keys()
+        # save data for this loop
+        source_loop.saveAsExcel(filename + '.xlsx', sheetName='source_loop',
+            stimOut=params,
+            dataOut=['n','all_mean','all_std', 'all_raw'])
         # mark thisTrial as finished
         if hasattr(thisTrial, 'status'):
             thisTrial.status = FINISHED
@@ -1720,7 +2207,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             trials.status = STARTED
         thisExp.nextEntry()
         
-    # completed 1 repeats of 'trials'
+    # completed totalIdeas repeats of 'trials'
     trials.status = FINISHED
     
     if thisSession is not None:
