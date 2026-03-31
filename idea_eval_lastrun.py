@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2026.1.0),
-    on March 31, 2026, at 00:42
+    on March 31, 2026, at 11:48
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -532,6 +532,10 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
         depth=0.0);
+    # Run 'Begin Experiment' code from changeObserverText
+    if currentRole != 'observation':
+        print('Current role: OBSERVER')
+        confidenceText.text = 'Насколько вы уверены в том, что именно этот участник является автором данной идеи?'
     confidenceIdeaText = visual.TextBox2(
          win, text='...', placeholder='Type here...', font='Courier New',
          ori=0.0, pos=(0, 0.10), draggable=False,      letterHeight=0.05,
@@ -546,7 +550,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
          flipHoriz=False, flipVert=False, languageStyle='LTR',
          editable=False,
          name='confidenceIdeaText',
-         depth=-1, autoLog=False,
+         depth=-2, autoLog=False,
     )
     confidenceTextHint = visual.TextStim(win=win, name='confidenceTextHint',
         text='0% — Идея, навеянная другой идеей      100% — Точно оригинальная идея',
@@ -554,21 +558,21 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         pos=(0, -0.07), draggable=False, height=0.03, wrapWidth=1.8, ori=0.0, 
         color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
-        depth=-3.0);
+        depth=-4.0);
     confidenceSlider = visual.Slider(win=win, name='confidenceSlider',
         startValue=None, size=(1.0, 0.06), pos=(0, -0.25), units=win.units,
         labels=('0%', '50%', '100%'), ticks=(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100), granularity=0.0,
         style='rating', styleTweaks=[], opacity=None,
         labelColor='LightGray', markerColor=(-0.4353, -0.5216, 0.0902), lineColor=(0.6000, 0.6941, 0.8510), colorSpace='rgb',
         font='Courier New', labelHeight=0.05,
-        flip=False, ori=0.0, depth=-4, readOnly=False)
+        flip=False, ori=0.0, depth=-5, readOnly=False)
     buttonText = visual.TextStim(win=win, name='buttonText',
         text='Нажмите ENTER для подтверждения',
         font='Courier New',
         pos=(0, -0.4), draggable=False, height=0.035, wrapWidth=None, ori=0.0, 
         color=(-0.9294, -0.9608, -0.7412), colorSpace='rgb', opacity=None, 
         languageStyle='LTR',
-        depth=-5.0);
+        depth=-6.0);
     confidenceProceedButton = keyboard.Keyboard(deviceName='defaultKeyboard')
     
     # --- Initialize components for Routine "prepare_source_routine" ---
