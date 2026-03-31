@@ -5,7 +5,7 @@
 
 Для начала, установите [PyschoPy v.2026.1.0](https://www.psychopy.org/download.html)
 
-- [Скачайте]() архив с экспериментом со страницы последнего релиза
+- [Скачайте](https://github.com/talasius/idea-source-monitoring/releases/tag/ism_v1.0) архив с экспериментом со страницы последнего релиза
 - Распакуйте ахрхив в любую папку
 - Откройте `/idea_eval.psyexp` в среде PsychoPy Builder для работы с GUI, или же
 - Откройте `/idea_eval.py` в среде PsychoPy Coder для работы с кодом
