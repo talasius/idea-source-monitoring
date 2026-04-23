@@ -1,5 +1,12 @@
 # Omit output directory
 /data
 
+# Omit data directories
+/data_save
+/data_analysis
+
+# Omit stimuli directory
+/stimuli
+
 #Omit lastrun file
 mcgurk_lastrun.py
